@@ -1,13 +1,18 @@
-require("dotenv").config();
-const express = require("express");
-const morgan = require("morgan");
+import dotenv from "dotenv";
+import express from "express";
+import morgan from "morgan";
+import userRoutes from "./routes/users.js";
+import client from "./config/db.js"; // PostgreSQL connection
+
+dotenv.config();
 const app = express();
-
 app.use(morgan("tiny"));
-const pool = require("./config/db"); // PostgreSQL connection
-pool.connect();
+app.use(express.json());
 
+client.connect();
 const PORT = process.env.PORT;
+
+app.use("/api/users", userRoutes);
 
 app.get("/", (req, res) => {
   res.send("Welcome to WMS");

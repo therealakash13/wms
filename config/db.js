@@ -1,6 +1,6 @@
-const { Pool } = require('pg');
+import { Client } from "pg";
 
-const pool = new Pool({
+const client = new Client({
   user: process.env.DB_USER,
   password: process.env.DB_PASSWORD,
   host: process.env.DB_HOST,
@@ -8,8 +8,8 @@ const pool = new Pool({
   database: process.env.DB_NAME,
 });
 
-pool.on('connect', () => {
-  console.log('✅ Connected to PostgreSQL database');
+client.on("connect", () => {
+  console.log("✅ Connected to PostgreSQL database");
 });
 
-module.exports = pool;
+export default client;
