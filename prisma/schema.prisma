@@ -30,10 +30,10 @@ model User {
 enum Role {
   ADMIN
   USER
-}
+} // Done all integrations with userModel
 
 model Item {
-  id          Int      @id @default(autoincrement())
+  id       String   @id @default(uuid()) @db.Uuid
   name        String
   sku         String   @unique
   description String?
@@ -70,7 +70,7 @@ model OrderLine {
   order     Order  @relation(fields: [orderId], references: [id])
   orderId   String @db.Uuid
   item      Item   @relation(fields: [itemId], references: [id])
-  itemId    Int
+  itemId    String @db.Uuid
   quantity  Int
   qtyPicked Int    @default(0)
 }
