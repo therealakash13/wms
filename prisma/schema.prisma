@@ -23,13 +23,16 @@ model User {
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt 
 
+  // relations
   orders    Order[]     @relation("CreatedOrders")
   picks     PickList[]  @relation("AssignedPicks")
+  items     Item[]      @relation("CreatedItems")
 }
 
 enum Role {
   ADMIN
   USER
+  PICKER
 } // Done all integrations with userModel
 
 model Item {
@@ -41,6 +44,10 @@ model Item {
   location    String?
   createdAt   DateTime @default(now())
 
+  // link to user
+  createdById String  @db.Uuid
+  createdBy   User?   @relation("CreatedItems", fields: [createdById], references: [id])
+
   orderLines  OrderLine[]
 }
 
@@ -49,6 +56,8 @@ model Order {
   customerName String
   status       OrderStatus @default(NEW)
   createdAt    DateTime    @default(now())
+
+  // link to user
   createdById  String      @db.Uuid
   createdBy    User?       @relation("CreatedOrders", fields: [createdById], references: [id])
 
@@ -66,30 +75,38 @@ enum OrderStatus {
 }
 
 model OrderLine {
-    id           String   @id @default(uuid()) @db.Uuid
-  order     Order  @relation(fields: [orderId], references: [id])
-  orderId   String @db.Uuid
-  item      Item   @relation(fields: [itemId], references: [id])
-  itemId    String @db.Uuid
+  id        String   @id @default(uuid()) @db.Uuid
+  order     Order    @relation(fields: [orderId], references: [id])
+  orderId   String   @db.Uuid
   quantity  Int
-  qtyPicked Int    @default(0)
+  qtyPicked Int      @default(0)
+
+  // link to item
+  itemId    String   @db.Uuid
+  item      Item     @relation(fields: [itemId], references: [id])
 }
 
 model PickList {
   id           String   @id @default(uuid()) @db.Uuid
-  order      Order    @relation(fields: [orderId], references: [id])
-  orderId    String      @unique @db.Uuid
-  assignedTo User?    @relation("AssignedPicks", fields: [assignedToId], references: [id])
-  assignedToId String? @db.Uuid
-  isComplete Boolean  @default(false)
-  createdAt  DateTime @default(now())
+  isComplete   Boolean  @default(false)
+  createdAt    DateTime @default(now())
+
+  // link to user
+  assignedTo   User?    @relation("AssignedPicks", fields: [assignedToId], references: [id])
+  assignedToId String?  @db.Uuid
+
+  // link to order
+  orderId      String   @unique @db.Uuid
+  order        Order    @relation(fields: [orderId], references: [id])
 }
 
 model Shipment {
-  id           String   @id @default(uuid()) @db.Uuid
-  order      Order    @relation(fields: [orderId], references: [id])
-  orderId    String      @unique   @db.Uuid
+  id         String   @id @default(uuid()) @db.Uuid
   carrier    String?
   trackingId String?
   shippedAt  DateTime?
+
+  // link to order
+  orderId    String   @unique   @db.Uuid
+  order      Order    @relation(fields: [orderId], references: [id])
 }

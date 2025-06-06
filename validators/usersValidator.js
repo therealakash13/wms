@@ -5,6 +5,11 @@ export const createUserSchema = z.object({
   username: z.string().min(3, "Username must be at least 3 characters long"),
   password: z.string().min(6, "Password must be at least 6 characters long"),
   role: z
-    .enum(["USER", "user", "admin", "picker", "ADMIN", "PICKER"])
-    .optional(), // default: USER
+    .string()
+    .transform((val) => val.toUpperCase())
+    .refine(
+      (val) => ["USER", "ADMIN", "PICKER"].includes(val),
+      "Role must be one of USER, ADMIN, or PICKER"
+    )
+    .optional(),
 });
