@@ -13,3 +13,5 @@ export const createUserSchema = z.object({
     )
     .optional(),
 });
+
+export const updateUserSchema = createUserSchema.partial();

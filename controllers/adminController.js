@@ -1,22 +1,22 @@
 import { ZodError } from "zod";
-import generateToken from "../utils/generateToken.js";
 import {
-  registerU,
-  readById,
-  updateUs,
+  createU,
+  readAllU,
+  readUById,
+  updateU,
   deleteU,
-  loginU,
-} from "../services/userService.js";
+  loginUser,
+} from "../services/adminService.js";
+import generateToken from "../utils/generateToken.js";
 
-export const registerUser = async (req, res) => {
+
+// CREATE user
+export const createUser = async (req, res) => {
   try {
-    const user = await registerU(res.body);
+    const user = await createU(req.body);
 
-    const token = generateToken(user); // Token generation
-    return res.status(201).json({
-      user: { id: user.id, username: user.username, email: user.email },
-      token,
-    });
+    const { password, ...userWithoutPassword } = user;
+    return res.status(201).json(userWithoutPassword);
   } catch (error) {
     if (error instanceof ZodError) {
       return res
@@ -33,18 +33,33 @@ export const registerUser = async (req, res) => {
   }
 };
 
+// Get all users
+export const getUsers = async (req, res) => {
+  try {
+    const allUsers = await readAllU();
+
+    const allUsersWithoutPassword = allUsers.map(
+      ({ password, ...rest }) => rest
+    );
+    return res.status(200).json(allUsersWithoutPassword);
+  } catch (error) {
+    console.log(error);
+    return res.status(500).json({ error: "Internal Server Error" });
+  }
+};
+
 // Get user by ID
 export const getUserById = async (req, res) => {
   const { id } = req.params;
   try {
-    const user = await readById(id);
+    const user = await readUById(id);
 
     if (!user) {
       return res.status(404).json({ error: "User not found" });
     }
 
     const { password, ...userWithoutPassword } = user;
-    return res.status(201).json(userWithoutPassword);
+    return res.status(200).json(userWithoutPassword);
   } catch (error) {
     console.log(error);
     return res.status(500).json({ error: "Internal Server Error" });
@@ -55,10 +70,10 @@ export const getUserById = async (req, res) => {
 export const updateUser = async (req, res) => {
   const { id } = req.params;
   try {
-    const updatedUser = await updateUs(id, req.body);
+    const updatedUser = await updateU(id, req.body);    
 
     const { password, ...userWithoutPassword } = updatedUser;
-    return res.status(201).json(userWithoutPassword);
+    return res.status(200).json(userWithoutPassword);
   } catch (error) {
     if (error instanceof ZodError) {
       return res
@@ -90,12 +105,17 @@ export const deleteUser = async (req, res) => {
   }
 };
 
-export const loginUser = async (req, res) => {
+export const loginAdmin = async (req, res) => {
   try {
-    const user = await loginU(req.data);
+    const user = await loginUser(req.body);
     const jwtToken = generateToken(user);
-    res
+    return res
       .status(200)
+      .cookie("token", jwtToken, {
+        // httpOnly: true,
+        // sameSite: "strict",
+        // maxAge: 1 * 24 * 60 * 60 * 1000, // 1 day
+      })
       .json({
         user: {
           id: user.id,
@@ -103,24 +123,9 @@ export const loginUser = async (req, res) => {
           role: user.role,
           email: user.email,
         },
-        token,
-      })
-      .cookie("token", jwtToken, {
-        httpOnly: true,
-        // sameSite: "strict",
-        // maxAge: 1 * 24 * 60 * 60 * 1000, // 1 day
+        token:jwtToken,
       });
-  } catch (error) {
+    } catch (error) {
     res.status(500).json({ error: "Login failed", details: error.message });
   }
-};
-
-export const logoutUser = (req, res) => {
-  return res.clearCookie("token", {
-    httpOnly: true,
-    // secure: process.env.NODE_ENV === "production",
-    // sameSite: "strict",
-  });
-
-  return res.status(200).json({ message: "Logged out successfully" });
 };

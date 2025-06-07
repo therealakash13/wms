@@ -1,18 +1,23 @@
 import dotenv from "dotenv";
 import express from "express";
 import morgan from "morgan";
-import userRoutes from "./routes/users.js";
+import adminRoutes from "./routes/adminRoutes.js";
+import userRoutes from "./routes/userRoutes.js";
 import client from "./config/db.js"; // PostgreSQL connection
+import cookieParser from "cookie-parser";
 
 dotenv.config();
 const app = express();
+app.use(cookieParser());
 app.use(morgan("tiny"));
 app.use(express.json());
+
 
 client.connect();
 const PORT = process.env.PORT;
 
-app.use("/api/users", userRoutes);
+app.use("/api/admin", adminRoutes);
+app.use("/api/user", userRoutes);
 
 app.get("/", (req, res) => {
   res.send("Welcome to WMS");
