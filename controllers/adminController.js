@@ -9,7 +9,6 @@ import {
 } from "../services/adminService.js";
 import generateToken from "../utils/generateToken.js";
 
-
 // CREATE user
 export const createUser = async (req, res) => {
   try {
@@ -70,7 +69,7 @@ export const getUserById = async (req, res) => {
 export const updateUser = async (req, res) => {
   const { id } = req.params;
   try {
-    const updatedUser = await updateU(id, req.body);    
+    const updatedUser = await updateU(id, req.body);
 
     const { password, ...userWithoutPassword } = updatedUser;
     return res.status(200).json(userWithoutPassword);
@@ -123,9 +122,20 @@ export const loginAdmin = async (req, res) => {
           role: user.role,
           email: user.email,
         },
-        token:jwtToken,
+        token: jwtToken,
       });
-    } catch (error) {
+  } catch (error) {
     res.status(500).json({ error: "Login failed", details: error.message });
   }
+};
+
+export const logoutAdmin = (req, res) => {
+  return res
+    .clearCookie("token", {
+      httpOnly: true,
+      // secure: process.env.NODE_ENV === "production",
+      // sameSite: "strict",
+    })
+    .status(200)
+    .json({ message: "Logged out successfully" });
 };

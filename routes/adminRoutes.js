@@ -6,6 +6,7 @@ import {
   updateUser,
   deleteUser,
   loginAdmin,
+  logoutAdmin,
 } from "../controllers/adminController.js";
 import roleMiddleware from "../middleware/roleMiddleware.js";
 import authMiddleware from "../middleware/authMiddleware.js";
@@ -19,6 +20,7 @@ router.put("/update/:id",authMiddleware,roleMiddleware("ADMIN"), updateUser);
 router.delete("/delete/:id",authMiddleware,roleMiddleware("ADMIN"), deleteUser);
 
 router.get("/login", loginAdmin);
+router.get("/logout", logoutAdmin);
 // Implement logout for admin and revisit all apis //
 
 export default router;

@@ -15,9 +15,9 @@ datasource db {
 }
 
 model User {
-  id       String   @id @default(uuid()) @db.Uuid
+  id        String   @id @default(uuid()) @db.Uuid
   username  String  
-  email String  @unique
+  email     String   @unique
   password  String
   role      Role     @default(USER)
   createdAt DateTime @default(now())
@@ -33,33 +33,33 @@ enum Role {
   ADMIN
   USER
   PICKER
-} // Done all integrations with userModel
+} 
 
 model Item {
-  id       String   @id @default(uuid()) @db.Uuid
+  id          String      @id @default(uuid()) @db.Uuid
   name        String
-  sku         String   @unique
+  sku         String      @unique
   description String?
-  quantity    Int      @default(0) // total available
+  quantity    Int         @default(0) // total available
   location    String?
-  createdAt   DateTime @default(now())
+  createdAt   DateTime    @default(now())
 
   // link to user
-  createdById String  @db.Uuid
-  createdBy   User?   @relation("CreatedItems", fields: [createdById], references: [id])
+  createdById String      @db.Uuid
+  createdBy   User?       @relation("CreatedItems", fields: [createdById], references: [id], onDelete: Cascade)
 
   orderLines  OrderLine[]
 }
 
 model Order {
-  id           String   @id @default(uuid()) @db.Uuid
+  id           String      @id @default(uuid()) @db.Uuid
   customerName String
   status       OrderStatus @default(NEW)
   createdAt    DateTime    @default(now())
 
   // link to user
   createdById  String      @db.Uuid
-  createdBy    User?       @relation("CreatedOrders", fields: [createdById], references: [id])
+  createdBy    User?       @relation("CreatedOrders", fields: [createdById], references: [id], onDelete: Cascade)
 
   orderLines   OrderLine[]
   pickList     PickList?
@@ -76,14 +76,14 @@ enum OrderStatus {
 
 model OrderLine {
   id        String   @id @default(uuid()) @db.Uuid
-  order     Order    @relation(fields: [orderId], references: [id])
+  order     Order    @relation(fields: [orderId], references: [id], onDelete: Cascade)
   orderId   String   @db.Uuid
   quantity  Int
   qtyPicked Int      @default(0)
 
   // link to item
   itemId    String   @db.Uuid
-  item      Item     @relation(fields: [itemId], references: [id])
+  item      Item     @relation(fields: [itemId], references: [id], onDelete: Cascade)
 }
 
 model PickList {
@@ -92,12 +92,12 @@ model PickList {
   createdAt    DateTime @default(now())
 
   // link to user
-  assignedTo   User?    @relation("AssignedPicks", fields: [assignedToId], references: [id])
+  assignedTo   User?    @relation("AssignedPicks", fields: [assignedToId], references: [id], onDelete: Cascade)
   assignedToId String?  @db.Uuid
 
   // link to order
   orderId      String   @unique @db.Uuid
-  order        Order    @relation(fields: [orderId], references: [id])
+  order        Order    @relation(fields: [orderId], references: [id], onDelete: Cascade)
 }
 
 model Shipment {
@@ -108,5 +108,5 @@ model Shipment {
 
   // link to order
   orderId    String   @unique   @db.Uuid
-  order      Order    @relation(fields: [orderId], references: [id])
+  order      Order    @relation(fields: [orderId], references: [id], onDelete: Cascade)
 }
