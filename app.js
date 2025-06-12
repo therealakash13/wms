@@ -5,9 +5,14 @@ import adminRoutes from "./routes/adminRoutes.js";
 import userRoutes from "./routes/userRoutes.js";
 import client from "./config/db.js";
 import cookieParser from "cookie-parser";
+import cors from "cors";
 
 dotenv.config();
 const app = express();
+app.use(cors({
+  origin: "http://localhost:5173", // frontend URL
+  credentials: true               // allow cookies if needed
+}));
 app.use(cookieParser());
 app.use(morgan("tiny"));
 app.use(express.json());

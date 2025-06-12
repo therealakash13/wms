@@ -10,7 +10,7 @@ import {
 
 export const registerUser = async (req, res) => {
   try {
-    const user = await registerU(res.body);
+    const user = await registerU(req.body);
 
     const token = generateToken(user); // Token generation
     return res.status(201).json({
