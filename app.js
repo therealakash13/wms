@@ -9,13 +9,13 @@ import cors from "cors";
 
 dotenv.config();
 const app = express();
+app.use(express.json());
+app.use(morgan("tiny"));
+app.use(cookieParser());
 app.use(cors({
   origin: "http://localhost:5173", // frontend URL
   credentials: true               // allow cookies if needed
 }));
-app.use(cookieParser());
-app.use(morgan("tiny"));
-app.use(express.json());
 
 client.connect();
 const PORT = process.env.PORT;

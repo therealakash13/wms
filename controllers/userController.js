@@ -16,6 +16,7 @@ export const registerUser = async (req, res) => {
     return res.status(201).json({
       user: { id: user.id, username: user.username, email: user.email },
       token,
+      message: "Registration Successful.",
     });
   } catch (error) {
     if (error instanceof ZodError) {
@@ -29,7 +30,9 @@ export const registerUser = async (req, res) => {
         .json({ error: "Email or username already exists." });
     }
     console.error(error);
-    return res.status(500).json({ error: "Internal server error" });
+    return res
+      .status(500)
+      .json({ error: "Internal server error", message: error.message });
   }
 };
 
@@ -92,9 +95,12 @@ export const deleteUser = async (req, res) => {
 
 export const loginUser = async (req, res) => {
   try {
-    const user = await loginU(req.data);
-    const jwtToken = generateToken(user);
+    const user = await loginU(req.body);
+
+    const jwtToken = generateToken(user); // Returns a signed JWT
+
     res
+      .cookie("token", jwtToken)
       .status(200)
       .json({
         user: {
@@ -103,12 +109,8 @@ export const loginUser = async (req, res) => {
           role: user.role,
           email: user.email,
         },
-        token,
-      })
-      .cookie("token", jwtToken, {
-        httpOnly: true,
-        // sameSite: "strict",
-        // maxAge: 1 * 24 * 60 * 60 * 1000, // 1 day
+        token: jwtToken,
+        message:"Logged In Successfully."
       });
   } catch (error) {
     res.status(500).json({ error: "Login failed", details: error.message });
